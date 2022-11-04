@@ -7,7 +7,7 @@ logistic_batch_size: 256
 # foudation model evaluation specifics
 cls_prior: 0.5
 num_realization: 2048
-epsilon: 0.2
+epsilon: '0.2'
 seed: 12
 fm_name: 'vit_base_patch16_224'
 calculate: 0
