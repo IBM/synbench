@@ -85,10 +85,6 @@ def get_bound_rep(loader, mu_1, mu_2, Sigma, epss=[0,0.2]):
         print(eps)
         mu = mu.cpu()
         z_S, _ = qcqp_solve(mu, D1_inv, float(eps) * torch.norm(mu, p=2))
-        
-        # w_0_naive = torch.matmul(D1_inv,mu)
-        # w_0_naive = w_0_naive.to(args.device)
-        # W_0_naive = torch.matmul(F1, w_0_naive)
 
         w_0 = torch.matmul(D1_inv,mu-torch.tensor(z_S).float())
         w_0 = w_0.to(args.device)
@@ -98,7 +94,7 @@ def get_bound_rep(loader, mu_1, mu_2, Sigma, epss=[0,0.2]):
 
         bound_epoch = 0
         accuracy_epoch = 0
-        for step, (x, y) in enumerate(loader):
+        for _, (x, y) in enumerate(loader):
 
             x = x.to(args.device)
             y = y.to(args.device)
@@ -111,9 +107,6 @@ def get_bound_rep(loader, mu_1, mu_2, Sigma, epss=[0,0.2]):
                 bound_epoch += (bb[(margin > 0) * (y==1) + (margin < 0) * (y==0)]).mean()
                 accuracy_epoch += ((margin > 0) * (y==1) + (margin < 0) * (y==0)).sum().item()/ y.size(0)
 
-            # if step % 2 == 0:
-            #     print(f"Step [{step}/{len(loader)}]\t Computing bound...")
-        # print(bound_epoch/len(loader))
         bound.append((bound_epoch/len(loader)).detach().cpu().numpy())
         accuracy.append((accuracy_epoch/len(loader)))
         
@@ -176,7 +169,7 @@ if __name__ == "__main__":
         encoder.eval()
         n_features = encoder.num_features        
 
-        mu_scales = np.arange(0.1, 5.0, 1.5) # np.arange(0.1, 5.0, 0.1)
+        mu_scales = np.arange(0.1, 5.0, 0.1)
         mu = torch.ones(3*224*224)/np.sqrt(3*224*224)
         Sigma = torch.eye(3*224*224)
 
@@ -248,13 +241,6 @@ if __name__ == "__main__":
         dct_accuracy['rep_{}'.format(epsilons[i])] = np.load(save_dir + '/accuracy_rep_{}.npy'.format(epsilons[i]))
         dct_bounds['rep_{}'.format(epsilons[i])] = np.load(save_dir + '/bounds_rep_{}.npy'.format(epsilons[i]))
     sz = mu_scales.shape[0]
-    print(mu_scales)
-    print(dct_accuracy['raw'])
-    print(dct_bounds['raw'])
-    print(dct_accuracy['rep_0'])
-    print(dct_bounds['rep_0'])
-    print(dct_accuracy['rep_0.2'])
-    print(dct_bounds['rep_0.2'])
 
     xgrid = np.linspace(0.6, 1.0, 100).reshape(100,1)
 
